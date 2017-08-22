@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>ストップウォッチ</title>
+        <style>
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                font-size: xx-large;
+            }
+            .display {
+                border: 5px inset;
+                padding: 10px;
+            }
+            .display__colon--hidden {
+                opacity: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="display">
+            <span class="display__hour">00</span>
+            <span class="display__colon">:</span>
+            <span class="display__minute">00</span>
+            <span class="display__colon">:</span>
+            <span class="display__second">00.000</span>
+        </div>
+        <div class="control">
+            <button class="control__switch">スタート/ストップ</button>
+            <button class="control__reset">リセット</button>
+        </div>
+        <script>
+            var colonElements = document.querySelectorAll(".display__colon");
+            function showColon() {
+                for (var colon of colonElements) {
+                    colon.classList.remove("display__colon--hidden");
+                }
+            }
+
+            function hideColon() {
+                for (var colon of colonElements) {
+                    colon.classList.add("display__colon--hidden");
+                }
+            }
+
+            var hourElement = document.querySelector(".display__hour");
+            var minuteElement = document.querySelector(".display__minute");
+            var secondElement = document.querySelector(".display__second");
+
+            function setDisplayTime(time) {
+                var hour = Math.floor(time / 3600000);
+                var minute = Math.floor((time % 3600000) / 60000);
+                var second = Math.floor((time % 60000) / 1000);
+                var millisecond = time % 1000;
+
+                var hourString = hour < 10 ? ("0" + hour): hour;
+                var minuteString = minute < 10 ? ("0" + minute): minute;
+                var secondString = second < 10 ? ("0" + second): second;
+                var millisecondString = (millisecond < 10 ? "00": millisecond < 100 ? "0": "") + millisecond;
+
+                hourElement.innerHTML = hourString;
+                minuteElement.innerHTML = minuteString;
+                secondElement.innerHTML = secondString + "." + millisecondString;
+
+                if (millisecond > 500) {
+                    hideColon();
+                } else {
+                    showColon();
+                }
+            }
+
+            var startTime;
+            var currentTime = 0;
+            var timerId;
+            var started = false;
+
+            document.querySelector(".control__switch").addEventListener("click", function() {
+                if (started) {
+                    clearInterval(timerId);
+                    currentTime = new Date() - startTime;
+                    setDisplayTime(currentTime);
+                    showColon();
+                    started = false;
+                } else {
+                    startTime = new Date() - currentTime;
+                    timerId = setInterval(function() {
+                        currentTime = new Date() - startTime;
+                        setDisplayTime(currentTime);
+                    }, 1);
+                    started = true;
+                }
+            });
+            document.querySelector(".control__reset").addEventListener("click", function() {
+                currentTime = 0;
+                setDisplayTime(currentTime);
+            });
+        </script>
+    </body>
+</html>
